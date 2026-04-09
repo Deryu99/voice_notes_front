@@ -29,14 +29,18 @@ function App({initialSelectedNote = null, conversation = [], searchQuery = '', u
 
     const [notes, setNotes] = useState<Note[]>([]);
     const [selectedNote, setSelectedNote] = useState<Note | null>(initialSelectedNote);
+    const [titleText, setTitleText] = useState<string>(initialSelectedNote?.title ?? '');
+    const [lastSavedTitle, setLastSavedTitle] = useState<string>(initialSelectedNote?.title ?? '');
+
     const [editorText, setEditorText] = useState<string>(initialSelectedNote?.summary ?? '');
     const [lastSavedText, setLastSavedText] = useState<string>(initialSelectedNote?.summary ?? '');
+
     const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle');
     const [isMoreOptionsOpen, setIsMoreOptionsOpen] = useState<boolean>(false);
     const saveRequestIdRef = useRef<number>(0);
     const [error, setError] = useState<string | null>(null);
 
-    const loadNotes: () => Promise<void> = async (): Promise<void> => {
+    const loadNotes = async (): Promise<void> => {
         try {
             const loadedNotes: Note[] = await getNotes();
             setNotes(loadedNotes ?? []);
@@ -63,11 +67,15 @@ function App({initialSelectedNote = null, conversation = [], searchQuery = '', u
     }, [conversation]);
 
     useEffect(() => {
-        if (!selectedNote || editorText === lastSavedText) {
+        const isTitleDirty: boolean = titleText !== lastSavedTitle;
+        const isSummaryDirty: boolean = editorText !== lastSavedText;
+
+        if (!selectedNote || (!isTitleDirty && !isSummaryDirty)) {
             return;
         }
 
         const currentNoteId: number = selectedNote.id;
+        const pendingTitle: string = titleText;
         const pendingText: string = editorText;
         const requestId: number = saveRequestIdRef.current + 1;
         saveRequestIdRef.current = requestId;
@@ -75,12 +83,15 @@ function App({initialSelectedNote = null, conversation = [], searchQuery = '', u
         const saveTimer: number = window.setTimeout(async (): Promise<void> => {
             setAutosaveStatus('saving');
             try {
-                const updatedNote: Note = await updateNote({ id: currentNoteId, summary: pendingText });
+                const updatedNote: Note = await updateNote({ id: currentNoteId, title: pendingTitle, summary: pendingText });
 
                 if (saveRequestIdRef.current !== requestId) {
                     return;
                 }
 
+                setTitleText(updatedNote.title);
+                setEditorText(updatedNote.summary);
+                setLastSavedTitle(updatedNote.title);
                 setLastSavedText(updatedNote.summary);
                 setAutosaveStatus('saved');
                 setNotes((prevNotes: Note[]): Note[] => prevNotes.map((note: Note): Note => (
@@ -100,18 +111,27 @@ function App({initialSelectedNote = null, conversation = [], searchQuery = '', u
         return (): void => {
             window.clearTimeout(saveTimer);
         };
-    }, [selectedNote, editorText, lastSavedText]);
+    }, [selectedNote, titleText, lastSavedTitle, editorText, lastSavedText]);
 
     const handleSelectNote = (note: Note): void => {
         setSelectedNote(note);
+        setTitleText(note.title);
+        setLastSavedTitle(note.title);
         setEditorText(note.summary);
         setLastSavedText(note.summary);
         setAutosaveStatus('idle');
     };
 
+    const handleTitleTextChange = (nextTitle: string): void => {
+        setTitleText(nextTitle);
+        const nextIsDirty: boolean = nextTitle !== lastSavedTitle || editorText !== lastSavedText;
+        setAutosaveStatus(nextIsDirty ? 'saving' : 'idle');
+    };
+
     const handleEditorTextChange = (nextText: string): void => {
         setEditorText(nextText);
-        setAutosaveStatus(nextText === lastSavedText ? 'idle' : 'saving');
+        const nextIsDirty: boolean = titleText !== lastSavedTitle || nextText !== lastSavedText;
+        setAutosaveStatus(nextIsDirty ? 'saving' : 'idle');
     };
 
     const handleDeleteNote = async (noteId: number): Promise<void> => {
@@ -121,6 +141,8 @@ function App({initialSelectedNote = null, conversation = [], searchQuery = '', u
             setSelectedNote((prevSelected: Note | null): Note | null => (
                 prevSelected?.id === noteId ? null : prevSelected
             ));
+            setTitleText('');
+            setLastSavedTitle('');
             setEditorText('');
             setLastSavedText('');
             setAutosaveStatus('idle');
@@ -154,6 +176,8 @@ function App({initialSelectedNote = null, conversation = [], searchQuery = '', u
                 <main className="voice-panel">
                     <VoicePanelHeader
                         selectedNote={selectedNote}
+                        titleValue={titleText}
+                        onTitleChange={handleTitleTextChange}
                         onMoreOptionsClick={(): void => setIsMoreOptionsOpen(true)}
                     />
                     <VoicePanelMessages conversation={conversation}/>
@@ -180,3 +204,4 @@ function App({initialSelectedNote = null, conversation = [], searchQuery = '', u
 }
 
 export default App;
+

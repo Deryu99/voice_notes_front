@@ -1,0 +1,118 @@
+.sidebar {
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar__logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+}
+
+.sidebar__logo-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(140deg, var(--accent), var(--accent-2));
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.sidebar__logo-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--title);
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar__nav-label {
+  font-size: 10px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 6px 8px 4px;
+}
+
+.sidebar__nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  color: var(--text-soft);
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.sidebar__nav-item:hover {
+  transform: translateX(2px);
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--title);
+}
+
+.sidebar__nav-item--active {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.22), rgba(14, 165, 233, 0.18));
+  color: var(--title);
+  font-weight: 600;
+}
+
+.sidebar__nav-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.sidebar__footer {
+  margin-top: auto;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.sidebar__avatar-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.sidebar__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  background: linear-gradient(140deg, var(--accent), var(--accent-2));
+}
+
+.sidebar__avatar-info {
+  min-width: 0;
+}
+
+.sidebar__avatar-name {
+  color: var(--title);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar__avatar-role {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+

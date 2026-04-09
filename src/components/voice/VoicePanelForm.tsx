@@ -24,14 +24,14 @@ export default function VoicePanelForm({selectedNote, textValue, onTextChange, a
             <div className="composer">
                 <form className="composer__form">
                     <div className="composer__box">
-                        {selectedNote && ( <div className="composer__note-title">{selectedNote.title}</div> )}
-                                <textarea
-                                    className="composer__textarea"
-                                    placeholder={selectedNote ? 'Edit selected note...' : 'Speak or type your note...'}
-                                    value={selectedNote ? textValue : ''}
-                                    onChange={(event) => onTextChange(event.target.value)}
-                                    disabled={!selectedNote}
-                                    rows={3}/>
+                        <textarea
+                            className="composer__textarea"
+                            placeholder={selectedNote ? 'Edit selected note...' : 'Speak or type your note...'}
+                            value={selectedNote ? textValue : ''}
+                            onChange={(event) => onTextChange(event.target.value)}
+                            disabled={!selectedNote}
+                            rows={3}
+                        />
                         <div className="composer__actions">
                             <div className="composer__actions-left">
                                 <button type="button" className="composer__btn composer__btn--record" id="record-btn">
