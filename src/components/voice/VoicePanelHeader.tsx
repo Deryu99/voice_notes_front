@@ -1,16 +1,40 @@
+import {useLayoutEffect, useRef} from "react";
 import type {Note} from "../../types/note.ts";
 
 interface VoicePanelHeaderProps {
     selectedNote?: Note | null;
+    titleValue: string;
+    onTitleChange: (value: string) => void;
     onMoreOptionsClick: () => void;
 }
-export default function VoicePanelHeader({selectedNote, onMoreOptionsClick}: VoicePanelHeaderProps) {
+export default function VoicePanelHeader({selectedNote, titleValue, onTitleChange, onMoreOptionsClick}: VoicePanelHeaderProps) {
+    const titleFieldRef = useRef<HTMLTextAreaElement | null>(null);
+
+    useLayoutEffect((): void => {
+        if (!selectedNote || !titleFieldRef.current) {
+            return;
+        }
+
+        const field: HTMLTextAreaElement = titleFieldRef.current;
+        field.style.height = '0px';
+        field.style.height = `${field.scrollHeight}px`;
+    }, [selectedNote, titleValue]);
+
     return (
         <>
             <div className="voice-panel__header">
-                <div>
+                <div className="voice-panel__header-main">
                     <div className="voice-panel__header-title">
-                        {selectedNote ? selectedNote.title : 'Select a note'}
+                        {selectedNote ? (
+                            <textarea
+                                ref={titleFieldRef}
+                                className="voice-panel__title-input"
+                                value={titleValue}
+                                onChange={(event) => onTitleChange(event.target.value)}
+                                placeholder="Note title"
+                                rows={1}
+                            />
+                        ) : 'Select a note'}
                     </div>
                     <div className="voice-panel__header-subtitle">
                         {selectedNote ? (
