@@ -1,4 +1,3 @@
-import './ImportResultsDialog.css';
 
 interface ImportResult {
     success: boolean;
@@ -17,26 +16,26 @@ export default function ImportResultsDialog({ isOpen, result, onClose }: ImportR
     if (!isOpen || !result) return null;
 
     return (
-        <div className="dialog-overlay" onClick={onClose}>
-            <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
-                <div className={`dialog-header ${result.success ? 'success' : 'error'}`}>
-                    <h2>{result.success ? '✓ Import Successful' : '✗ Import Failed'}</h2>
+        <div className="dialog" onClick={onClose}>
+            <div className="dialog__panel" onClick={(e) => e.stopPropagation()}>
+                <div className={`dialog__header ${result.success ? 'dialog__header--success' : 'dialog__header--error'}`}>
+                    <h2 className="dialog__title">{result.success ? '✓ Import Successful' : '✗ Import Failed'}</h2>
                 </div>
                 
-                <div className="dialog-body">
-                    <div className="result-item">
-                        <span className="label">Imported:</span>
-                        <span className="value">{result.imported}</span>
+                <div className="dialog__body">
+                    <div className="dialog__row">
+                        <span className="dialog__label">Imported:</span>
+                        <span className="dialog__value">{result.imported}</span>
                     </div>
-                    <div className="result-item">
-                        <span className="label">Skipped:</span>
-                        <span className="value">{result.skipped}</span>
+                    <div className="dialog__row">
+                        <span className="dialog__label">Skipped:</span>
+                        <span className="dialog__value">{result.skipped}</span>
                     </div>
                     
                     {result.errors.length > 0 && (
-                        <div className="errors-section">
-                            <span className="label">Errors:</span>
-                            <ul className="errors-list">
+                        <div className="dialog__errors">
+                            <span className="dialog__label">Errors:</span>
+                            <ul className="dialog__list">
                                 {result.errors.map((error, index) => (
                                     <li key={index}>{error}</li>
                                 ))}
@@ -45,8 +44,8 @@ export default function ImportResultsDialog({ isOpen, result, onClose }: ImportR
                     )}
                 </div>
 
-                <div className="dialog-footer">
-                    <button onClick={onClose} className="btn-close">Close</button>
+                <div className="dialog__footer">
+                    <button onClick={onClose} className="dialog__button dialog__button--close">Close</button>
                 </div>
             </div>
         </div>

@@ -1,7 +1,10 @@
+import * as React from "react";
+
 interface NoteListHeaderProps {
-    searchQuery?: string
+    searchQuery?: string;
+    onSearchQueryChange: (query: string) => void;
 }
-export default function NoteListHeader({searchQuery}: NoteListHeaderProps){
+export default function NoteListHeader({searchQuery, onSearchQueryChange}: NoteListHeaderProps): React.JSX.Element {
     return (
         <>
             <div className="notes-list__header">
@@ -13,7 +16,7 @@ export default function NoteListHeader({searchQuery}: NoteListHeaderProps){
                         className="notes-list__search-input"
                         placeholder="Search notes..."
                         value={searchQuery}
-                        onChange={() => { /* handle search */ }}
+                        onChange={(event) => onSearchQueryChange(event.target.value)}
                     />
                 </div>
             </div>

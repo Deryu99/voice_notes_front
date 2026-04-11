@@ -4,7 +4,7 @@ import './App.css';
 import type {Note} from './types/note.ts';
 import type {User} from "./types/user.ts";
 import type {Message} from "./types/message.ts";
-import {deleteNote, getNotes, updateNote} from './services/notesApi.tsx';
+import {deleteNote, getNotes, searchNotes, updateNote} from './services/notesApi.tsx';
 import NoteListHeader from "./components/notes/NoteListHeader.tsx";
 import NoteListTabs from "./components/notes/NoteListTabs.tsx";
 import Sidebar from "./components/layout/Sidebar.tsx";
@@ -19,13 +19,12 @@ interface AppProps {
     notes?: Note[];
     initialSelectedNote?: Note | null;
     conversation?: Message[];
-    searchQuery?: string;
     user?: User;
 }
 
 type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
-function App({initialSelectedNote = null, conversation = [], searchQuery = '', user = { email: 'myemail@gmail.com' }}: AppProps) {
+function App({initialSelectedNote = null, conversation = [], user = { email: 'myemail@gmail.com' }}: AppProps) {
 
     const [notes, setNotes] = useState<Note[]>([]);
     const [selectedNote, setSelectedNote] = useState<Note | null>(initialSelectedNote);
@@ -38,7 +37,12 @@ function App({initialSelectedNote = null, conversation = [], searchQuery = '', u
     const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle');
     const [isMoreOptionsOpen, setIsMoreOptionsOpen] = useState<boolean>(false);
     const saveRequestIdRef = useRef<number>(0);
+    const searchRequestIdRef = useRef<number>(0);
     const [error, setError] = useState<string | null>(null);
+
+    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [isSearching, setIsSearching] = useState<boolean>(false);
+    const [searchError, setSearchError] = useState<string | null>(null);
 
     const loadNotes = async (): Promise<void> => {
         try {
@@ -48,16 +52,6 @@ function App({initialSelectedNote = null, conversation = [], searchQuery = '', u
             setError('Could not load notes! ' + error);
         }
     };
-
-    useEffect(():() => void => {
-        const loadTimer: number = window.setTimeout((): void => {
-            void loadNotes();
-        }, 0);
-
-        return (): void => {
-            window.clearTimeout(loadTimer);
-        };
-    }, []);
 
     useEffect((): void => {
         const messages: HTMLElement|null = document.getElementById('messages');
@@ -153,6 +147,51 @@ function App({initialSelectedNote = null, conversation = [], searchQuery = '', u
         }
     };
 
+    useEffect(() => {
+        const requestId: number = searchRequestIdRef.current + 1;
+        searchRequestIdRef.current = requestId;
+
+        const searchTimer: number = window.setTimeout(async (): Promise<void> => {
+            const trimmedQuery: string = searchQuery.trim();
+
+            setSearchError(null);
+            setIsSearching(true);
+
+            try {
+                if (trimmedQuery === '') {
+                    const loadedNotes: Note[] = await getNotes();
+
+                    if (searchRequestIdRef.current !== requestId) {
+                        return;
+                    }
+
+                    setNotes(loadedNotes ?? []);
+                    return;
+                }
+
+                const foundNotes: Note[] = await searchNotes(trimmedQuery);
+
+                if (searchRequestIdRef.current !== requestId) {
+                    return;
+                }
+
+                setNotes(foundNotes ?? []);
+            } catch (searchError) {
+                if (searchRequestIdRef.current === requestId) {
+                    setSearchError('Error while searching note! ' + searchError);
+                }
+            } finally {
+                if (searchRequestIdRef.current === requestId) {
+                    setIsSearching(false);
+                }
+            }
+        }, 300);
+
+        return (): void => {
+            window.clearTimeout(searchTimer);
+        };
+    }, [searchQuery]);
+
     return (
         <div className="app-wrapper">
             <div className="app-frame">
@@ -161,10 +200,12 @@ function App({initialSelectedNote = null, conversation = [], searchQuery = '', u
 
                 {/* NOTES LIST */}
                 <section className="notes-list">
-                    <NoteListHeader searchQuery={searchQuery}/>
+                    <NoteListHeader searchQuery={searchQuery} onSearchQueryChange={setSearchQuery}/>
                     <NoteListTabs />
                     {/* Maybe put errors in a component*/}
                     {error && (<div className="notes-list__empty">{error}</div>)}
+                    {searchError &&(<div className="notes-list__empty">{searchError}</div>)}
+                    {isSearching && !searchError && (<div className="notes-list__empty">Searching...</div>)}
                     <NotesList
                         notes={notes}
                         selectedNote={selectedNote}

@@ -1,4 +1,3 @@
-import './ImportResultsDialog.css';
 import * as React from "react";
 import type {Note} from "../../types/note.ts";
 
@@ -35,27 +34,27 @@ export default function MoreOptionsModalDialog({selectedNote, isOpen, onDeleteNo
     };
 
     return (
-        <div className="dialog-overlay" onClick={onClose}>
-            <div className="dialog-content more-options-dialog" onClick={(event) => event.stopPropagation()}>
-                <div className="dialog-header">
-                    <h2>More options</h2>
+        <div className="dialog" onClick={onClose}>
+            <div className="dialog__panel" onClick={(event) => event.stopPropagation()}>
+                <div className="dialog__header">
+                    <h2 className="dialog__title">More options</h2>
                 </div>
 
-                <div className="dialog-body">
+                <div className="dialog__body">
                     <p>{selectedNote ? `Actions for "${selectedNote.title}".` : 'No note selected.'}</p>
-                    {deleteError && <p className="dialog-error">{deleteError}</p>}
+                    {deleteError && <p className="dialog__error">{deleteError}</p>}
                 </div>
 
-                <div className="dialog-footer">
+                <div className="dialog__footer">
                     <button
                         type="button"
-                        className="btn-secondary"
+                        className="dialog__button dialog__button--secondary"
                         onClick={() => void handleDeleteNote()}
                         disabled={!selectedNote || isDeleting}
                     >
                         {isDeleting ? 'Deleting...' : 'Delete note'}
                     </button>
-                    <button onClick={onClose} className="btn-close">Close</button>
+                    <button onClick={onClose} className="dialog__button dialog__button--close">Close</button>
                 </div>
             </div>
         </div>

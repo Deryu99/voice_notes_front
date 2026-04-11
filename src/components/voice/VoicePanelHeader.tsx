@@ -1,5 +1,6 @@
 import {useLayoutEffect, useRef} from "react";
 import type {Note} from "../../types/note.ts";
+import * as React from "react";
 
 interface VoicePanelHeaderProps {
     selectedNote?: Note | null;
@@ -7,7 +8,7 @@ interface VoicePanelHeaderProps {
     onTitleChange: (value: string) => void;
     onMoreOptionsClick: () => void;
 }
-export default function VoicePanelHeader({selectedNote, titleValue, onTitleChange, onMoreOptionsClick}: VoicePanelHeaderProps) {
+export default function VoicePanelHeader({selectedNote, titleValue, onTitleChange, onMoreOptionsClick}: VoicePanelHeaderProps): React.JSX.Element {
     const titleFieldRef = useRef<HTMLTextAreaElement | null>(null);
 
     useLayoutEffect((): void => {
