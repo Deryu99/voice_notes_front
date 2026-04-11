@@ -59,7 +59,7 @@ export async function deleteNote(payload: DeleteNotePayload): Promise<Note> {
 
 export async function searchNotes(query: string): Promise<Note[]> {
     try {
-        const response: Response = await fetch(`/api/search-notes/${encodeURIComponent(query)}`);
+        const response: Response = await fetch(`/api/search-notes?q=${encodeURIComponent(query)}`);
         if (!response.ok) {throw new Error(`HTTP ${response.status}`);}
         return response.json();
     } catch (error) {
