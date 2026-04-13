@@ -4,7 +4,7 @@ import './App.css';
 import type {Note} from './types/note.ts';
 import type {User} from "./types/user.ts";
 import type {Message} from "./types/message.ts";
-import {deleteNote, deleteTagFromNote, getNotes, searchNotes, updateNote} from './services/notesApi.tsx';
+import {deleteNote, getNotes, searchNotes, updateNote} from './services/notesApi.tsx';
 import NoteListHeader from "./components/notes/NoteListHeader.tsx";
 import NoteListTabs from "./components/notes/NoteListTabs.tsx";
 import Sidebar from "./components/layout/Sidebar.tsx";
@@ -150,8 +150,17 @@ function App({initialSelectedNote = null, conversation = [], user = { email: 'my
 
     const handleDeleteTagFromNote = async (noteId: number, tag: string): Promise<void> => {
         try {
-            const response: { success: boolean; note: Note } = await deleteTagFromNote({id: noteId, tag: tag});
-            const updatedNote: Note = response.note;
+            const currentNote: Note | undefined = notes.find((note: Note): boolean => note.id === noteId)
+                ?? (selectedNote?.id === noteId ? selectedNote : undefined);
+
+            if (!currentNote) {
+                setError('Could not delete tag from note: Note not found');
+                return;
+            }
+
+            const nextTags: string[] = currentNote.tags.filter((currentTag: string): boolean => currentTag !== tag);
+            const updatedNote: Note = await updateNote({ id: noteId, tags: nextTags });
+
             setNotes((prevNotes: Note[]): Note[] => prevNotes.map((note: Note): Note => (
                 note.id === updatedNote.id ? { ...note, ...updatedNote } : note
             )));

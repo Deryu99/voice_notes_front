@@ -1,8 +1,6 @@
 import type {
     DeleteNotePayload,
     DeleteNoteResult,
-    DeleteTagFromNoteResult,
-    DeleteTagPayload,
     ImportNotesResult,
     Note,
     UpdateNotePayload,
@@ -80,23 +78,6 @@ export async function searchNotes(query: string): Promise<Note[]> {
         return response.json();
     } catch (error) {
         console.log('Error searching note note: ', error);
-        throw error;
-    }
-}
-
-export async function deleteTagFromNote(payload: DeleteTagPayload): Promise<DeleteTagFromNoteResult> {
-    try {
-        const response: Response = await fetch('/api/delete-tag-from-note', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-        });
-        if (!response.ok) {throw new Error(`HTTP ${response.status}`);}
-        return response.json() as Promise<DeleteTagFromNoteResult>;
-    } catch (error) {
-        console.log('Error while deleting tag from note: ', error);
         throw error;
     }
 }
