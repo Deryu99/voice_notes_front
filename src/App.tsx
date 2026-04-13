@@ -4,7 +4,7 @@ import './App.css';
 import type {Note} from './types/note.ts';
 import type {User} from "./types/user.ts";
 import type {Message} from "./types/message.ts";
-import {deleteNote, getNotes, searchNotes, updateNote} from './services/notesApi.tsx';
+import {deleteNote, deleteTagFromNote, getNotes, searchNotes, updateNote} from './services/notesApi.tsx';
 import NoteListHeader from "./components/notes/NoteListHeader.tsx";
 import NoteListTabs from "./components/notes/NoteListTabs.tsx";
 import Sidebar from "./components/layout/Sidebar.tsx";
@@ -14,6 +14,7 @@ import NotesList from "./components/notes/NotesList.tsx";
 import VoicePanelForm from "./components/voice/VoicePanelForm.tsx";
 import NoteDetailsPanel from "./components/notes/NoteDetailsPanel.tsx";
 import MoreOptionsModalDialog from "./components/ui/MoreOptionsModalDialog.tsx";
+import * as React from "react";
 
 interface AppProps {
     notes?: Note[];
@@ -24,7 +25,7 @@ interface AppProps {
 
 type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
-function App({initialSelectedNote = null, conversation = [], user = { email: 'myemail@gmail.com' }}: AppProps) {
+function App({initialSelectedNote = null, conversation = [], user = { email: 'myemail@gmail.com' }}: AppProps): React.JSX.Element {
 
     const [notes, setNotes] = useState<Note[]>([]);
     const [selectedNote, setSelectedNote] = useState<Note | null>(initialSelectedNote);
@@ -147,6 +148,22 @@ function App({initialSelectedNote = null, conversation = [], user = { email: 'my
         }
     };
 
+    const handleDeleteTagFromNote = async (noteId: number, tag: string): Promise<void> => {
+        try {
+            const response: { success: boolean; note: Note } = await deleteTagFromNote({id: noteId, tag: tag});
+            const updatedNote: Note = response.note;
+            setNotes((prevNotes: Note[]): Note[] => prevNotes.map((note: Note): Note => (
+                note.id === updatedNote.id ? { ...note, ...updatedNote } : note
+            )));
+            setSelectedNote((prevSelected: Note | null): Note | null => (
+                prevSelected?.id === updatedNote.id ? { ...prevSelected, ...updatedNote } : prevSelected
+            ));
+        } catch (deleteTagError) {
+            setError('Could not delete tag from note: '+ deleteTagError);
+            throw deleteTagError;
+        }
+    };
+
     useEffect(() => {
         const requestId: number = searchRequestIdRef.current + 1;
         searchRequestIdRef.current = requestId;
@@ -231,7 +248,7 @@ function App({initialSelectedNote = null, conversation = [], user = { email: 'my
                 </main>
 
                 {/* DETAILS PANEL */}
-                <NoteDetailsPanel selectedNote={selectedNote} />
+                <NoteDetailsPanel selectedNote={selectedNote} onTagDelete={handleDeleteTagFromNote}/>
             </div>
 
             <MoreOptionsModalDialog

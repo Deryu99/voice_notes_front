@@ -18,9 +18,24 @@ export interface DeleteNotePayload {
     summary?: string;
 }
 
+export interface DeleteTagPayload {
+    id: number;
+    tag: string;
+}
+
 export interface ImportNotesResult {
     success: boolean;
     imported: number;
     skipped: number;
     errors: string[];
+    message?: string;
+}
+
+export interface DeleteNoteResult {
+    success: boolean;
+}
+
+export interface DeleteTagFromNoteResult {
+    success: boolean;
+    note: Note;
 }
