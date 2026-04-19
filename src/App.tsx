@@ -149,32 +149,22 @@ function App({initialSelectedNote = null, conversation = [], user = { email: 'my
     };
 
     const handleDeleteTagFromNote = async (noteId: number, tag: string): Promise<void> => {
-        try {
-            const currentNote: Note | undefined = notes.find((note: Note): boolean => note.id === noteId)
-                ?? (selectedNote?.id === noteId ? selectedNote : undefined);
+        const currentNote: Note | undefined = notes.find((note: Note): boolean => note.id === noteId)
+            ?? (selectedNote?.id === noteId ? selectedNote : undefined);
 
-            if (!currentNote) {
-                const noteNotFoundError: Error = new Error('Could not delete tag from note: Note not found');
-                setError(noteNotFoundError.message);
-                throw noteNotFoundError;
-            }
-
-            const nextTags: string[] = currentNote.tags.filter((currentTag: string): boolean => currentTag !== tag);
-            const updatedNote: Note = await updateNote({ id: noteId, tags: nextTags });
-
-            setNotes((prevNotes: Note[]): Note[] => prevNotes.map((note: Note): Note => (
-                note.id === updatedNote.id ? { ...note, ...updatedNote } : note
-            )));
-            setSelectedNote((prevSelected: Note | null): Note | null => (
-                prevSelected?.id === updatedNote.id ? { ...prevSelected, ...updatedNote } : prevSelected
-            ));
-        } catch (deleteTagError) {
-            const deleteTagErrorMessage: string = deleteTagError instanceof Error
-                ? deleteTagError.message
-                : String(deleteTagError);
-            setError(`Could not delete tag from note: ${deleteTagErrorMessage}`);
-            throw deleteTagError;
+        if (!currentNote) {
+            throw new Error('Could not delete tag from note: Note not found');
         }
+
+        const nextTags: string[] = currentNote.tags.filter((currentTag: string): boolean => currentTag !== tag);
+        const updatedNote: Note = await updateNote({ id: noteId, tags: nextTags });
+
+        setNotes((prevNotes: Note[]): Note[] => prevNotes.map((note: Note): Note => (
+            note.id === updatedNote.id ? { ...note, ...updatedNote } : note
+        )));
+        setSelectedNote((prevSelected: Note | null): Note | null => (
+            prevSelected?.id === updatedNote.id ? { ...prevSelected, ...updatedNote } : prevSelected
+        ));
     };
 
     useEffect(() => {
