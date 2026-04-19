@@ -10,12 +10,11 @@ export interface UpdateNotePayload {
     id: number;
     title?: string;
     summary?: string;
+    tags?: string[];
 }
 
 export interface DeleteNotePayload {
     id: number;
-    title?: string;
-    summary?: string;
 }
 
 export interface ImportNotesResult {
@@ -23,4 +22,9 @@ export interface ImportNotesResult {
     imported: number;
     skipped: number;
     errors: string[];
+    message?: string;
+}
+
+export interface DeleteNoteResult {
+    success: boolean;
 }

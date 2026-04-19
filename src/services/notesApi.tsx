@@ -1,4 +1,10 @@
-import type {DeleteNotePayload, ImportNotesResult, Note, UpdateNotePayload} from "../types/note.ts";
+import type {
+    DeleteNotePayload,
+    DeleteNoteResult,
+    ImportNotesResult,
+    Note,
+    UpdateNotePayload,
+} from "../types/note.ts";
 
 export async function getNotes(): Promise<Note[]> {
     try {
@@ -15,7 +21,22 @@ export async function importNotes(): Promise<ImportNotesResult> {
     try {
         const response: Response = await fetch('/api/import-notes', { method: 'POST' });
         if (!response.ok) {throw new Error(`HTTP ${response.status}`);}
-        return response.json();
+        const data: Partial<ImportNotesResult> & { errors?: unknown; message?: unknown } = await response.json();
+        const errors: string[] = Array.isArray(data.errors)
+            ? data.errors.filter((error): error is string => typeof error === 'string')
+            : typeof data.errors === 'string'
+                ? [data.errors]
+                : typeof data.message === 'string'
+                    ? [data.message]
+                    : [];
+
+        return {
+            success: typeof data.success === 'boolean' ? data.success : data.success === 'true',
+            imported: data.imported ?? 0,
+            skipped: data.skipped ?? 0,
+            errors,
+            message: typeof data.message === 'string' ? data.message : undefined,
+        };
     } catch (error) {
         console.log('Error importing notes: ', error);
         throw error;
@@ -40,7 +61,7 @@ export async function updateNote(payload: UpdateNotePayload): Promise<Note> {
 }
 
 
-export async function deleteNote(payload: DeleteNotePayload): Promise<Note> {
+export async function deleteNote(payload: DeleteNotePayload): Promise<DeleteNoteResult> {
     try {
         const response: Response = await fetch('/api/delete-note', {
             method: 'POST',

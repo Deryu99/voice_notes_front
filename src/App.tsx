@@ -14,6 +14,7 @@ import NotesList from "./components/notes/NotesList.tsx";
 import VoicePanelForm from "./components/voice/VoicePanelForm.tsx";
 import NoteDetailsPanel from "./components/notes/NoteDetailsPanel.tsx";
 import MoreOptionsModalDialog from "./components/ui/MoreOptionsModalDialog.tsx";
+import * as React from "react";
 
 interface AppProps {
     notes?: Note[];
@@ -24,7 +25,7 @@ interface AppProps {
 
 type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
-function App({initialSelectedNote = null, conversation = [], user = { email: 'myemail@gmail.com' }}: AppProps) {
+function App({initialSelectedNote = null, conversation = [], user = { email: 'myemail@gmail.com' }}: AppProps): React.JSX.Element {
 
     const [notes, setNotes] = useState<Note[]>([]);
     const [selectedNote, setSelectedNote] = useState<Note | null>(initialSelectedNote);
@@ -147,6 +148,25 @@ function App({initialSelectedNote = null, conversation = [], user = { email: 'my
         }
     };
 
+    const handleDeleteTagFromNote = async (noteId: number, tag: string): Promise<void> => {
+        const currentNote: Note | undefined = notes.find((note: Note): boolean => note.id === noteId)
+            ?? (selectedNote?.id === noteId ? selectedNote : undefined);
+
+        if (!currentNote) {
+            throw new Error('Note not found');
+        }
+
+        const nextTags: string[] = currentNote.tags.filter((currentTag: string): boolean => currentTag !== tag);
+        const updatedNote: Note = await updateNote({ id: noteId, tags: nextTags });
+
+        setNotes((prevNotes: Note[]): Note[] => prevNotes.map((note: Note): Note => (
+            note.id === updatedNote.id ? { ...note, ...updatedNote } : note
+        )));
+        setSelectedNote((prevSelected: Note | null): Note | null => (
+            prevSelected?.id === updatedNote.id ? { ...prevSelected, ...updatedNote } : prevSelected
+        ));
+    };
+
     useEffect(() => {
         const requestId: number = searchRequestIdRef.current + 1;
         searchRequestIdRef.current = requestId;
@@ -231,7 +251,7 @@ function App({initialSelectedNote = null, conversation = [], user = { email: 'my
                 </main>
 
                 {/* DETAILS PANEL */}
-                <NoteDetailsPanel selectedNote={selectedNote} />
+                <NoteDetailsPanel selectedNote={selectedNote} onTagDelete={handleDeleteTagFromNote}/>
             </div>
 
             <MoreOptionsModalDialog

@@ -27,7 +27,7 @@ export default function MoreOptionsModalDialog({selectedNote, isOpen, onDeleteNo
             await onDeleteNote(selectedNote.id);
         } catch (error) {
             setDeleteError('Could not delete this note. Please try again.');
-            console.error('Delete note failed:', error);
+            console.error('Delete note failed: ', error);
         } finally {
             setIsDeleting(false);
         }

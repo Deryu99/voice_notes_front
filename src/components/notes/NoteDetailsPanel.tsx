@@ -1,4 +1,6 @@
 import type {Note} from "../../types/note.ts";
+import * as React from "react";
+import {useState} from "react";
 
 const WAVEFORM_HEIGHTS: number[] = [
     8, 14, 22, 18, 10, 28, 32, 20, 14, 24, 30, 16,
@@ -9,8 +11,41 @@ const WAVEFORM_HEIGHTS: number[] = [
 
 interface NoteDetailsPanelProps {
     selectedNote?: Note | null;
+    onTagDelete: (noteId: number, tag: string) => Promise<void>;
 }
-export default function NoteDetailsPanel({selectedNote}: NoteDetailsPanelProps) {
+export default function NoteDetailsPanel({selectedNote, onTagDelete}: NoteDetailsPanelProps): React.JSX.Element {
+    const [error, setError] = useState<string>('');
+    const [deletingTags, setDeletingTags] = useState<Set<string>>(new Set());
+
+    React.useEffect((): void => {
+        setError('');
+        setDeletingTags(new Set());
+    }, [selectedNote?.id]);
+    const handleDeleteTag = async (tag: string): Promise<void> => {
+        if (!selectedNote) {
+            return;
+        }
+
+        const noteIdAtClick: number = selectedNote.id;
+        setError('');
+        setDeletingTags((prev: Set<string>) => new Set(prev).add(tag));
+        try {
+            await onTagDelete(noteIdAtClick, tag);
+        } catch (error) {
+            if (selectedNote?.id === noteIdAtClick) {
+                setError('Could not delete this note\'s tag. Please try again.');
+            }
+            console.error('Delete note\'s tag failed: ', error);
+        } finally {
+            if (selectedNote?.id === noteIdAtClick) {
+                setDeletingTags((prev: Set<string>) => {
+                    const next = new Set(prev);
+                    next.delete(tag);
+                    return next;
+                });
+            }
+        }
+    };
     return (
         <aside className="details-panel">
             {selectedNote ? (
@@ -45,13 +80,26 @@ export default function NoteDetailsPanel({selectedNote}: NoteDetailsPanelProps) 
                             <>
                                 <div className="details-panel__section-label">Tags</div>
                                 <div className="details-panel__tags">
-                                    {selectedNote.tags.map((tag: string, idx: number) => (
-                                        <span key={idx} className="details-panel__tag">{tag}</span>
+                                    {selectedNote.tags.map((tag: string, index: number) => (
+                                        <span key={`${tag}-${index}`} className="details-panel__tag">
+                                            <span>{tag}</span>
+                                            <button
+                                                type="button"
+                                                className="details-panel__tag-remove"
+                                                onClick={() => void handleDeleteTag(tag)}
+                                                disabled={deletingTags.size > 0}
+                                                aria-label={`Remove tag ${tag}`}
+                                                title={`Remove tag ${tag}`}
+                                            >
+                                                {deletingTags.has(tag) ? '...' : 'x'}
+                                            </button>
+                                        </span>
                                     ))}
                                 </div>
                             </>
                         )}
                     </div>
+                    {error && <p className="details-panel__error">{error}</p>}
                 </>
             ) : (
                 <div className="details-panel__empty">
