@@ -21,14 +21,21 @@ export async function importNotes(): Promise<ImportNotesResult> {
     try {
         const response: Response = await fetch('/api/import-notes', { method: 'POST' });
         if (!response.ok) {throw new Error(`HTTP ${response.status}`);}
-        const data: Partial<ImportNotesResult> = await response.json();
+        const data: Partial<ImportNotesResult> & { errors?: unknown; message?: unknown } = await response.json();
+        const errors: string[] = Array.isArray(data.errors)
+            ? data.errors.filter((error): error is string => typeof error === 'string')
+            : typeof data.errors === 'string'
+                ? [data.errors]
+                : typeof data.message === 'string'
+                    ? [data.message]
+                    : [];
 
         return {
             success: Boolean(data.success),
             imported: data.imported ?? 0,
             skipped: data.skipped ?? 0,
-            errors: data.errors ?? (data.message ? [data.message] : []),
-            message: data.message,
+            errors,
+            message: typeof data.message === 'string' ? data.message : undefined,
         };
     } catch (error) {
         console.log('Error importing notes: ', error);
