@@ -15,7 +15,7 @@ interface NoteDetailsPanelProps {
 }
 export default function NoteDetailsPanel({selectedNote, onTagDelete}: NoteDetailsPanelProps): React.JSX.Element {
     const [error, setError] = useState<string>('');
-    const [deletingTag, setDeletingTag] = useState<string | null>(null);
+    const [deletingTags, setDeletingTags] = useState<Set<string>>(new Set());
 
     const handleDeleteTag = async (tag: string): Promise<void> => {
         if (!selectedNote) {
@@ -23,14 +23,18 @@ export default function NoteDetailsPanel({selectedNote, onTagDelete}: NoteDetail
         }
 
         setError('');
-        setDeletingTag(tag);
+        setDeletingTags((prev: Set<string>) => new Set(prev).add(tag));
         try {
             await onTagDelete(selectedNote.id, tag);
         } catch (error) {
             setError('Could not delete this note\'s tag. Please try again.');
             console.error('Delete note\'s tag failed: ', error);
         } finally {
-            setDeletingTag(null);
+            setDeletingTags((prev: Set<string>) => {
+                const next = new Set(prev);
+                next.delete(tag);
+                return next;
+            });
         }
     };
     return (
@@ -74,11 +78,11 @@ export default function NoteDetailsPanel({selectedNote, onTagDelete}: NoteDetail
                                                 type="button"
                                                 className="details-panel__tag-remove"
                                                 onClick={() => void handleDeleteTag(tag)}
-                                                disabled={deletingTag === tag}
+                                                disabled={deletingTags.has(tag)}
                                                 aria-label={`Remove tag ${tag}`}
                                                 title={`Remove tag ${tag}`}
                                             >
-                                                {deletingTag === tag ? '...' : 'x'}
+                                                {deletingTags.has(tag) ? '...' : 'x'}
                                             </button>
                                         </span>
                                     ))}
