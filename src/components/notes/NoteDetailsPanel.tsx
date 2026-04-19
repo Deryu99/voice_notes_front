@@ -67,8 +67,8 @@ export default function NoteDetailsPanel({selectedNote, onTagDelete}: NoteDetail
                             <>
                                 <div className="details-panel__section-label">Tags</div>
                                 <div className="details-panel__tags">
-                                    {selectedNote.tags.map((tag: string) => (
-                                        <span key={tag} className="details-panel__tag">
+                                    {selectedNote.tags.map((tag: string, index: number) => (
+                                        <span key={`${tag}-${index}`} className="details-panel__tag">
                                             <span>{tag}</span>
                                             <button
                                                 type="button"
