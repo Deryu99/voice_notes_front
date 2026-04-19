@@ -154,8 +154,9 @@ function App({initialSelectedNote = null, conversation = [], user = { email: 'my
                 ?? (selectedNote?.id === noteId ? selectedNote : undefined);
 
             if (!currentNote) {
-                setError('Could not delete tag from note: Note not found');
-                return;
+                const noteNotFoundError: Error = new Error('Could not delete tag from note: Note not found');
+                setError(noteNotFoundError.message);
+                throw noteNotFoundError;
             }
 
             const nextTags: string[] = currentNote.tags.filter((currentTag: string): boolean => currentTag !== tag);
