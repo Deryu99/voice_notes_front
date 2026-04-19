@@ -31,7 +31,7 @@ export async function importNotes(): Promise<ImportNotesResult> {
                     : [];
 
         return {
-            success: Boolean(data.success),
+            success: typeof data.success === 'boolean' ? data.success : data.success === 'true',
             imported: data.imported ?? 0,
             skipped: data.skipped ?? 0,
             errors,
