@@ -169,7 +169,10 @@ function App({initialSelectedNote = null, conversation = [], user = { email: 'my
                 prevSelected?.id === updatedNote.id ? { ...prevSelected, ...updatedNote } : prevSelected
             ));
         } catch (deleteTagError) {
-            setError('Could not delete tag from note: '+ deleteTagError);
+            const deleteTagErrorMessage: string = deleteTagError instanceof Error
+                ? deleteTagError.message
+                : String(deleteTagError);
+            setError(`Could not delete tag from note: ${deleteTagErrorMessage}`);
             throw deleteTagError;
         }
     };
