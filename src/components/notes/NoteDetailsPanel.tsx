@@ -17,6 +17,10 @@ export default function NoteDetailsPanel({selectedNote, onTagDelete}: NoteDetail
     const [error, setError] = useState<string>('');
     const [deletingTags, setDeletingTags] = useState<Set<string>>(new Set());
 
+    React.useEffect((): void => {
+        setError('');
+        setDeletingTags(new Set());
+    }, [selectedNote?.id]);
     const handleDeleteTag = async (tag: string): Promise<void> => {
         if (!selectedNote) {
             return;
