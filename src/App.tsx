@@ -153,8 +153,10 @@ function App({initialSelectedNote = null, conversation = [], user = { email: 'my
             ?? (selectedNote?.id === noteId ? selectedNote : undefined);
 
         if (!currentNote) {
-            throw new Error('Could not delete tag from note: Note not found');
-                throw new Error('Note not found');
+            throw new Error('Note not found');
+        }
+
+        const nextTags: string[] = currentNote.tags.filter((currentTag: string): boolean => currentTag !== tag);
         const updatedNote: Note = await updateNote({ id: noteId, tags: nextTags });
 
         setNotes((prevNotes: Note[]): Note[] => prevNotes.map((note: Note): Note => (
